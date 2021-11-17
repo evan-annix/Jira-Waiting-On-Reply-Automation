@@ -34,3 +34,6 @@ This is the actual output of the above comment via the Jira REST API (specifical
 ### REGEX
 
 https://regex101.com/r/mWhPO5/1
+
+
+Big thanks to Bill Sheboy and Darryl Lee from the Atlassian community forums for their help with this!
