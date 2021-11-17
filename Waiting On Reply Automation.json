@@ -1,0 +1,378 @@
+{
+  "rules": [
+    {
+      "id": 2625553,
+      "clientKey": "jira:67cb1745-b21b-4f37-aecc-4650bf8d189c",
+      "name": "Waiting on Reply Field",
+      "state": "ENABLED",
+      "description": "To flag a user as needing to reply to your comment on a task, just add a \"!\" after their name in the comment, eg : @Evan Nixon !\n\nThe user you have flagged will automatically have their name put in the \"Waiting on Reply\" field. Once that user comments on that task, their name will automatically be removed from that field. \n\nTo check what issues currently need your attention go to \"Dashboards\" in the top bar of Jira and view the \"All Projects Dashboard\". Under \"Waiting For My Reply\" you'll find all of the tasks in which you are currently listed in the \"Waiting on Reply\" field.\n\nGo respond to those comments and you'll automatically be removed from the \"Waiting on Reply\" field, and your dashboard will update to reflect that (within a few minutes).",
+      "authorAccountId": "610a6c430b454a00681be664",
+      "actor": {
+        "type": "EVENT_INITIATOR",
+        "value": null
+      },
+      "created": 1635873489452,
+      "updated": 1637157129202,
+      "trigger": {
+        "id": "71975782",
+        "component": "TRIGGER",
+        "parentId": null,
+        "conditionParentId": null,
+        "schemaVersion": 1,
+        "type": "jira.issue.event.trigger:commented",
+        "value": {
+          "eventKey": "jira:issue_updated",
+          "issueEvent": "issue_commented",
+          "eventTypes": []
+        },
+        "children": [],
+        "conditions": []
+      },
+      "components": [
+        {
+          "id": "71975783",
+          "component": "BRANCH",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.issue.related",
+          "value": {
+            "relatedType": "current",
+            "jql": "",
+            "linkTypes": [],
+            "onlyUpdatedIssues": false,
+            "similarityLimit": 40
+          },
+          "children": [
+            {
+              "id": "71975784",
+              "component": "CONDITION",
+              "parentId": null,
+              "conditionParentId": null,
+              "schemaVersion": 1,
+              "type": "jira.comparator.condition",
+              "value": {
+                "first": "{{issue.customfield_10632.accountId}}",
+                "second": "{{initiator.accountId}}",
+                "operator": "CONTAINS"
+              },
+              "children": [],
+              "conditions": []
+            },
+            {
+              "id": "71975785",
+              "component": "ACTION",
+              "parentId": null,
+              "conditionParentId": null,
+              "schemaVersion": 10,
+              "type": "jira.issue.edit",
+              "value": {
+                "operations": [],
+                "advancedFields": "{\n   \"fields\": {\n\t\t\"customfield_10632\" : [\n\t\t{{issue.customfield_10632.accountId.remove(initiator.accountId).asJsonObject(\"id\")}}\n\t\t]\n\t}\n}",
+                "sendNotifications": false
+              },
+              "children": [],
+              "conditions": []
+            },
+            {
+              "id": "71975786",
+              "component": "ACTION",
+              "parentId": null,
+              "conditionParentId": null,
+              "schemaVersion": 1,
+              "type": "codebarrel.action.log",
+              "value": "CLEARED COMMENTER FROM FIELD",
+              "children": [],
+              "conditions": []
+            }
+          ],
+          "conditions": []
+        },
+        {
+          "id": "71975787",
+          "component": "CONDITION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.comparator.condition",
+          "value": {
+            "first": "{{comment.body}}",
+            "second": "\\[~accountid:.{0,45}\\].{0,4}!",
+            "operator": "REGEX_CONTAINS"
+          },
+          "children": [],
+          "conditions": []
+        },
+        {
+          "id": "71975788",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.issue.refresh.issue",
+          "value": {
+            "delayMs": null
+          },
+          "children": [],
+          "conditions": []
+        },
+        {
+          "id": "71975789",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "codebarrel.action.log",
+          "value": "CONTAINS FLAGGED MENTION REGEX TRUE",
+          "children": [],
+          "conditions": []
+        },
+        {
+          "id": "71975790",
+          "component": "CONDITION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.condition.container.block",
+          "value": null,
+          "children": [
+            {
+              "id": "71975791",
+              "component": "CONDITION_BLOCK",
+              "parentId": null,
+              "conditionParentId": null,
+              "schemaVersion": 1,
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "id": "71975793",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "codebarrel.action.log",
+                  "value": "IS EMPTY",
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975794",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "jira.create.variable",
+                  "value": {
+                    "id": "_customsmartvalue_id_1637079857520",
+                    "name": {
+                      "type": "FREE",
+                      "value": "IsEmptyUsers"
+                    },
+                    "type": "SMART",
+                    "query": {
+                      "type": "SMART",
+                      "value": "{{issue.comments.last.body.match(\"(\\[~accountid:.{0,45}\\].{0,4}!)\").remove(\"[~accountid:\").replaceAll(\"\\\\s\",\"\").remove(\"]\\!\").asJsonObject(\"id\")}}"
+                    },
+                    "lazy": false
+                  },
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975795",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 10,
+                  "type": "jira.issue.edit",
+                  "value": {
+                    "operations": [],
+                    "advancedFields": "{\n   \"fields\": {\n\t\t\"customfield_10632\" : [\n\t\t{{IsEmptyUsers}}\n\t\t]\n\t}\n}",
+                    "sendNotifications": false
+                  },
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975796",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "codebarrel.action.log",
+                  "value": "{{IsEmptyUsers}}",
+                  "children": [],
+                  "conditions": []
+                }
+              ],
+              "conditions": [
+                {
+                  "id": "71975792",
+                  "component": "CONDITION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 3,
+                  "type": "jira.issue.condition",
+                  "value": {
+                    "selectedField": {
+                      "type": "NAME",
+                      "value": "Waiting on Reply"
+                    },
+                    "selectedFieldType": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+                    "comparison": "EMPTY",
+                    "compareValue": null
+                  },
+                  "children": [],
+                  "conditions": []
+                }
+              ]
+            },
+            {
+              "id": "71975797",
+              "component": "CONDITION_BLOCK",
+              "parentId": null,
+              "conditionParentId": null,
+              "schemaVersion": 1,
+              "type": "jira.condition.if.block",
+              "value": {
+                "conditionMatchType": "ALL"
+              },
+              "children": [
+                {
+                  "id": "71975799",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "codebarrel.action.log",
+                  "value": "IS NOT EMPTY",
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975800",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "jira.create.variable",
+                  "value": {
+                    "id": "_customsmartvalue_id_1636713487461",
+                    "name": {
+                      "type": "FREE",
+                      "value": "NotEmptyUsers"
+                    },
+                    "type": "SMART",
+                    "query": {
+                      "type": "SMART",
+                      "value": "{{issue.customfield_10632.accountId.asJsonObject(\"id\")}},{{issue.comments.last.body.match(\"(\\[~accountid:.{0,45}\\].{0,4}!)\").remove(\"[~accountid:\").replaceAll(\"\\\\s\",\"\").remove(\"]\\!\").asJsonObject(\"id\")}}"
+                    },
+                    "lazy": false
+                  },
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975801",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 10,
+                  "type": "jira.issue.edit",
+                  "value": {
+                    "operations": [],
+                    "advancedFields": "{\n   \"fields\": {\n\t\t\"customfield_10632\" : [\n\t\t{{NotEmptyUsers}}\n\t\t]\n\t}\n}",
+                    "sendNotifications": true
+                  },
+                  "children": [],
+                  "conditions": []
+                },
+                {
+                  "id": "71975802",
+                  "component": "ACTION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 1,
+                  "type": "codebarrel.action.log",
+                  "value": "{{NotEmptyUsers}}",
+                  "children": [],
+                  "conditions": []
+                }
+              ],
+              "conditions": [
+                {
+                  "id": "71975798",
+                  "component": "CONDITION",
+                  "parentId": null,
+                  "conditionParentId": null,
+                  "schemaVersion": 3,
+                  "type": "jira.issue.condition",
+                  "value": {
+                    "selectedField": {
+                      "type": "NAME",
+                      "value": "Waiting on Reply"
+                    },
+                    "selectedFieldType": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+                    "comparison": "NOT_EMPTY",
+                    "compareValue": null
+                  },
+                  "children": [],
+                  "conditions": []
+                }
+              ]
+            }
+          ],
+          "conditions": []
+        },
+        {
+          "id": "71975803",
+          "component": "ACTION",
+          "parentId": null,
+          "conditionParentId": null,
+          "schemaVersion": 1,
+          "type": "jira.issue.refresh.issue",
+          "value": {
+            "delayMs": null
+          },
+          "children": [],
+          "conditions": []
+        }
+      ],
+      "canOtherRuleTrigger": false,
+      "notifyOnError": "FIRSTERROR",
+      "projects": [
+        {
+          "projectId": "10104",
+          "projectTypeKey": "business"
+        }
+      ],
+      "labels": [],
+      "tags": [
+        {
+          "id": 2497434,
+          "tagType": "TEMPLATE_ID",
+          "tagValue": "software_template_7"
+        },
+        {
+          "id": 2497432,
+          "tagType": "CREATION_TYPE",
+          "tagValue": "USER"
+        },
+        {
+          "id": 2497433,
+          "tagType": "SAMPLE_RULE",
+          "tagValue": "global"
+        }
+      ],
+      "ruleScope": {
+        "resources": [
+          "ari:cloud:jira:c1426ee5-f8c8-4845-8004-ec9fb4a95712:project/10104"
+        ]
+      }
+    }
+  ],
+  "cloud": true
+}
